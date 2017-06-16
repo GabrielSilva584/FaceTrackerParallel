@@ -126,12 +126,18 @@ void Align3Dto2DShapes(double& scale,double& pitch,double& yaw,double& roll,
   cv::Mat s2D_cpy = s2D.clone(),s3D_cpy = s3D.clone();
   cv::Mat X = (s2D_cpy.reshape(1,2)).t(),S = (s3D_cpy.reshape(1,3)).t();
 
+  #ifdef _OPENMP
+  #pragma omp parallel for
+  #endif
   for(i = 0; i < 2; i++){
     cv::Mat v = X.col(i);
     t2[i] = sum(v)[0]/n;
     v-=t2[i];
   }
 
+  #ifdef _OPENMP
+  #pragma omp parallel for
+  #endif
   for(i = 0; i < 3; i++){
     cv::Mat v = S.col(i);
     t3[i] = sum(v)[0]/n;
@@ -208,6 +214,7 @@ void PDM::Clamp(cv::Mat &p,double c)
   cv::MatIterator_<double> p1 =  p.begin<double>();
   cv::MatIterator_<double> p2 =  p.end<double>();
   double v;
+
   for(; p1 != p2; ++p1,++e){
     v = c*sqrt(*e);
     if(fabs(*p1) > v){
@@ -244,6 +251,9 @@ void PDM::CalcShape2D(cv::Mat &s,cv::Mat &plocal,cv::Mat &pglobl)
     s.create(2*n,1,CV_64F);
   }
 
+  #ifdef _OPENMP
+  #pragma omp parallel for
+  #endif
   for(int i = 0; i < n; i++){
     s.db(i  ,0) = a*( R_.db(0,0)*S_.db(i    ,0) + R_.db(0,1)*S_.db(i+n  ,0) +
 		      R_.db(0,2)*S_.db(i+n*2,0) )+x;

@@ -164,6 +164,9 @@ void PAW::Init(cv::Mat &src,cv::Mat &tri)
   _alpha.create(this->nTri(),3,CV_64F);
 	_beta.create(this->nTri(),3,CV_64F);
 
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
   for(i = 0; i < this->nTri(); i++){
     j = _tri.it(i,0);
 		k = _tri.it(i,1);
@@ -183,6 +186,9 @@ void PAW::Init(cv::Mat &src,cv::Mat &tri)
   cv::MatIterator_<double> x = _src.begin<double>(),y =_src.begin<double>()+n;
   double vx,vy,xmax=*x,ymax=*y,xmin=*x,ymin=*y;
 
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
   for(i = 0; i < n; i++){
     vx = *x++;
 		vy = *y++;
@@ -199,6 +205,9 @@ void PAW::Init(cv::Mat &src,cv::Mat &tri)
 
 	_nPix = 0;
 
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
   for(i = 0; i < h; i++){
     for(j = 0; j < w; j++,++mp,++tp){
       isWithinTri(double(j)+xmin,double(i)+ymin,tri,_src);
@@ -234,6 +243,9 @@ void PAW::CalcCoeff()
   int i,j,k,l,p=this->nPoints();
 	double c1,c2,c3,c4,c5,c6,*coeff,*alpha,*beta;
 
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
   for(l = 0; l < this->nTri(); l++){
     i = _tri.it(l,0);
 		j = _tri.it(l,1);
@@ -273,6 +285,9 @@ void PAW::WarpRegion(cv::Mat &mapx,cv::Mat &mapy)
   cv::MatIterator_<uchar> mp = _mask.begin<uchar>();
   cv::MatIterator_<int>   tp = _tridx.begin<int>();
 
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
   for(y = 0; y < _mask.rows; y++){
 		yi = double(y) + _ymin;
     for(x = 0; x < _mask.cols; x++){

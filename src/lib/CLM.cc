@@ -261,13 +261,14 @@ void CLM::Fit(cv::Mat im, vector<int> &wSize,
   int i,idx,n = _pdm.nPoints(); double a1,b1,tx1,ty1,a2,b2,tx2,ty2;
 
   for(int witer = 0; witer < (int)wSize.size(); witer++){
+
     _pdm.CalcShape2D(cshape_,_plocal,_pglobl);
     CalcSimT(_refs,cshape_,a1,b1,tx1,ty1);
     invSimT(a1,b1,tx1,ty1,a2,b2,tx2,ty2);
     idx = this->GetViewIdx();
 
 		#ifdef _OPENMP
-		#pragma omp parallel for
+		#pragma omp parallel for schedule(dynamic, 1)
 		#endif
     for(i = 0; i < n; i++){
       if(_visi[idx].rows == n){
@@ -283,7 +284,8 @@ void CLM::Fit(cv::Mat im, vector<int> &wSize,
 				wmem_[i].create(h,w,CV_32F);
 		 	}
       cv::Mat wimg = wmem_[i](cv::Rect(0,0,w,h));
-      CvMat wimg_o = wimg,sim_o = sim; IplImage im_o = im;
+      CvMat wimg_o = wimg,sim_o = sim;
+      IplImage im_o = im;
       cvGetQuadrangleSubPix(&im_o,&wimg_o,&sim_o);
       if(wSize[witer] > pmem_[i].rows){
 				pmem_[i].create(wSize[witer],wSize[witer],CV_64F);
